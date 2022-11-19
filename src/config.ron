@@ -1,0 +1,21 @@
+// Fill in your own configs here. It will be compiled into the wasm.
+// Btw, Rust syntax comments are possible in this file.
+Config {
+    // release 0.000_001 N / second
+    nano_near_per_second: 1_000,
+    // Static list of staking pools, can only change by recompling and
+    // redeploying the contract.
+    // list: https://explorer.near.org/nodes/validators
+    staking_pools: [
+        "chorusone.pool.f863973.m0", //< make this an account that is an active staking pool on testnet, otherwise tests will fail
+        "gettingnear.pool.f863973.m0",
+        "YOUR-FAVOURITE-VALIADTOR-2.poolv1.near",
+        "YOUR-FAVOURITE-VALIADTOR-3.poolv1.near",
+        "YOUR-FAVOURITE-VALIADTOR-4.poolv1.near",
+        "YOUR-FAVOURITE-VALIADTOR-5.poolv1.near",
+        "YOUR-FAVOURITE-VALIADTOR-6.poolv1.near",
+        "YOUR-FAVOURITE-VALIADTOR-7.poolv1.near",
+        "YOUR-FAVOURITE-VALIADTOR-8.poolv1.near",
+        "YOUR-FAVOURITE-VALIADTOR-9.poolv1.near",
+    ],
+}
