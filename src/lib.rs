@@ -63,9 +63,26 @@ impl Teller {
         }
     }
 
+    /// Send Near tokens to an account. Amount is specified in yocto Near.
+    pub fn pay_yocto(&mut self, yocto: &String, a: AccountId) {
+        let yocto: u128 = yocto.parse().expect("could not parse input yocto");
+        let receiver = &a;
+        if let Err(e) = self.pay_impl(yocto, receiver) {
+            e.panic()
+        }
+    }
+
     /// Make Near tokens unavailable for retrieval from hot wallet. Only whole Near values.
     pub fn lock(&mut self, n: Near) {
         let yocto = n as u128 * 10u128.pow(24);
+        if let Err(e) = self.lock_impl(yocto) {
+            e.panic()
+        }
+    }
+
+    /// Make Near tokens unavailable for retrieval from hot wallet. Amount is specified in yocto Near.
+    pub fn lock_yocto(&mut self, yocto: &String) {
+        let yocto: u128 = yocto.parse().expect("could not parse input yocto");
         if let Err(e) = self.lock_impl(yocto) {
             e.panic()
         }
@@ -85,6 +102,16 @@ impl Teller {
     pub fn stake(&mut self, i: u32, n: Near) {
         let staking_pool = select_staking_pool(i as usize);
         let yocto = n as u128 * 10u128.pow(24);
+
+        if let Err(e) = self.stake_impl(yocto, &staking_pool) {
+            e.panic()
+        }
+    }
+
+    /// Stake with validator[i].Amount is specified in yocto Near.
+    pub fn stake_yocto(&mut self, i: u32, yocto: &String) {
+        let staking_pool = select_staking_pool(i as usize);
+        let yocto: u128 = yocto.parse().expect("could not parse input yocto");
 
         if let Err(e) = self.stake_impl(yocto, &staking_pool) {
             e.panic()

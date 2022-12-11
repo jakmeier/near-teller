@@ -36,6 +36,27 @@ fn test_pay() {
 }
 
 #[test]
+fn test_pay_yocto() {
+    let mut app = install();
+    fast_forward(10, 13);
+    let tokens = seconds_to_yocto(1);
+    let token_string = format!("{tokens}");
+
+    for _ in 0..5 {
+        app.pay_yocto(&token_string, "max.near".parse().unwrap());
+    }
+
+    let expected = seconds_to_yocto(8);
+    assert_eq!(expected, app.hot());
+
+    for _ in 0..8 {
+        app.pay_yocto(&token_string, "max.near".parse().unwrap());
+    }
+    let expected = 0;
+    assert_eq!(expected, app.hot());
+}
+
+#[test]
 #[should_panic]
 fn test_pay_too_much() {
     let mut app = install();
@@ -70,6 +91,27 @@ fn test_lock() {
 
     for _ in 0..8 {
         app.lock(tokens);
+    }
+    let expected = 0;
+    assert_eq!(expected, app.hot());
+}
+
+#[test]
+fn test_lock_yocto() {
+    let mut app = install();
+    fast_forward(10, 13);
+    let tokens = seconds_to_yocto(1);
+    let token_string = format!("{tokens}");
+
+    for _ in 0..5 {
+        app.lock_yocto(&token_string);
+    }
+
+    let expected = seconds_to_yocto(8);
+    assert_eq!(expected, app.hot());
+
+    for _ in 0..8 {
+        app.lock_yocto(&token_string);
     }
     let expected = 0;
     assert_eq!(expected, app.hot());
