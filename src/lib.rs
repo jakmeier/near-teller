@@ -7,6 +7,8 @@
 //! 1. Pay: Send `arg.N` tokens to `arg.account`.
 //! 2. Lock: Forgo `arg.N` tokens that can no longer be retrieved by 1.
 //! 3. Stake: Call `deposit_and_stake` on `CONFIG.staking_pools[arg.staking_pool]` and attach `arg.N` tokens.
+//! 4. Unstake: Call `unstake_all` on `CONFIG.staking_pools[arg.staking_pool]`.
+//! 5. Unstake: Call `withdraw_all` on `CONFIG.staking_pools[arg.staking_pool]`.
 //!
 //! Pay and lock are limited by how many tokens are unlocked for hot wallet access.
 //! Staking is unlimited. (Besides the external limit of actual tokens in the account.)
@@ -15,8 +17,6 @@
 //!
 //! - No dynamic staking: Calling a method with the name `deposit_and_stake` on an arbitrary account makes it possible to retrieve all tokens with hot key.
 //! - No dynamic rate change: Necessary allowance computation makes code more complicated.
-//! - No unstaking: Unstaking to withdraw is only possible up to a limit anyway, an actual movement of assets requires full access anyway.
-//!                 Restaking could make sense but goes against the principle of making it as simple as possible.
 
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen, AccountId, Balance, Gas, GasWeight};
@@ -80,14 +80,28 @@ impl Teller {
 
     /// Stake with validator[i].
     pub fn stake(&mut self, i: u32, n: Near) {
-        // safety: rust will panic on out-of-bound access
-        let staking_pool_str = CONFIG.staking_pools[i as usize];
-        let Ok(staking_pool) = staking_pool_str.parse() else {
-            env::panic_str("invalid pre-installed account");
-        };
+        let staking_pool = staking_pool(i as usize);
         let yocto = n as u128 * 10u128.pow(24);
 
         if let Err(e) = self.stake_impl(yocto, &staking_pool) {
+            e.panic()
+        }
+    }
+
+    /// Unstake and withdraw all balance staked with validator[i].
+    pub fn unstake(&mut self, i: u32) {
+        let staking_pool = staking_pool(i as usize);
+
+        if let Err(e) = self.unstake_impl(&staking_pool) {
+            e.panic()
+        }
+    }
+
+    /// Withdraw all balance staked with validator[i].
+    pub fn withdraw(&mut self, i: u32) {
+        let staking_pool = staking_pool(i as usize);
+
+        if let Err(e) = self.withdraw_impl(&staking_pool) {
             e.panic()
         }
     }
@@ -124,6 +138,36 @@ impl Teller {
         Ok(())
     }
 
+    fn unstake_impl(&mut self, staking_pool: &AccountId) -> Result<()> {
+        Self::check_access()?;
+        let index: u64 = env::promise_batch_create(&staking_pool);
+        let attached_balance = 0;
+        env::promise_batch_action_function_call_weight(
+            index,
+            "unstake_all",
+            &[],
+            attached_balance,
+            Gas(0),
+            GasWeight(1),
+        );
+        Ok(())
+    }
+
+    fn withdraw_impl(&mut self, staking_pool: &AccountId) -> Result<()> {
+        Self::check_access()?;
+        let index: u64 = env::promise_batch_create(&staking_pool);
+        let attached_balance = 0;
+        env::promise_batch_action_function_call_weight(
+            index,
+            "withdraw_all",
+            &[],
+            attached_balance,
+            Gas(0),
+            GasWeight(1),
+        );
+        Ok(())
+    }
+
     fn check_access() -> Result<()> {
         if env::current_account_id() == env::predecessor_account_id() {
             Ok(())
@@ -140,6 +184,15 @@ impl Teller {
             Ok(())
         }
     }
+}
+
+fn staking_pool(i: usize) -> AccountId {
+    // safety: rust will panic on out-of-bound access
+    let staking_pool_str = CONFIG.staking_pools[i];
+    let Ok(staking_pool) = staking_pool_str.parse() else {
+        env::panic_str("invalid pre-installed account");
+    };
+    staking_pool
 }
 
 #[derive(Debug)]
