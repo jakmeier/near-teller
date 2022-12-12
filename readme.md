@@ -206,10 +206,11 @@ smart contract. It is not endorsed by any companies or organizations that I am
 or was associated with. The code was not audited, either.
 
 This is the first real smart contract I implemented. Hence I do not have the
-necessary experience or expertise to write contracts that move larger amounts of
-money than you are willing to lose. Use with discretion.
+necessary experience or expertise to write contracts that move large amounts of
+money. Use with discretion and please don't put all your life savings in a
+near-teller contract.
 
-Under no circumstances shall contributors to this code base be liable for
+Under no circumstances shall contributors to this codebase be liable for
 damages caused direct or indirect by the code provided.
 
 ## License
