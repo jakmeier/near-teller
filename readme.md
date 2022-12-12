@@ -15,7 +15,7 @@ The purpose of this setup is that someone who gained access to your function acc
 ![Graphic showing token flow in and out of teller](./res/in-and-out-flow.png)
 
 You might notice staking, unstaking, and withdrawal operations performed on a
-staking pool. This is done by calling methods on a (staking pool
+staking pool. This is done by calling methods on a [staking pool
 contract](https://github.com/near/core-contracts/tree/master/staking-pool). This
 will transfer tokens to the pool and stake with them.
 
@@ -34,10 +34,11 @@ access key, which gives access to all tokens anyway.
 
 ### Moving between hot and cold balance
 
-Cold balance is converted to hot balance at a constant rate. The exact can be
-configured before deploying the contract.
+Cold balance is converted to hot balance at a constant rate. The exact rate can
+be configured before deploying the contract.
 
-If the hot balance is getting too large for your taste, use `lock` to convert it back.
+If the hot balance is getting too large for your taste, manually call `lock` to
+convert it back.
 
 ![Graphic showing flow between cold and hot balance](./res/hot-and-cold.png)
 
